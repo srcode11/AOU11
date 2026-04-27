@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Practice | AOU Study Tracker</title>
+  <link rel="icon" type="image/png" href="img/logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .ai-gradient { background: linear-gradient(135deg, #1d4ed8 0%, #4f46e5 100%); }
+    .option-btn { transition: all 0.2s; }
+    .option-btn.selected { border-color: #2563eb; background-color: #eff6ff; }
+    .option-btn.correct { border-color: #10b981; background-color: #ecfdf5; }
+    .option-btn.incorrect { border-color: #ef4444; background-color: #fef2f2; }
+    .typing::after { content: '|'; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .pulse-ring { animation: pulse-ring 2s infinite; }
+    @keyframes pulse-ring { 0%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.1);opacity:0.2} 100%{transform:scale(1);opacity:0.5} }
+    .slide-up { animation: slideUp 0.4s ease forwards; }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <nav class="bg-white border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+      <a href="home.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <img src="img/logo.png" alt="AOU Logo" class="w-9 h-9 rounded-full object-cover" />
+        <span class="font-bold text-gray-800 text-lg">AOU Study Tracker</span>
+      </a>
+      <div class="flex items-center gap-6 text-sm font-medium text-gray-600">
+        <a href="home.html" class="hover:text-blue-600 transition-colors">Dashboard</a>
+        <a href="courses.html" class="hover:text-blue-600 transition-colors">Courses</a>
+        <a href="index.html" class="hover:text-red-500 transition-colors">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-6 py-8">
+
+    <a id="backBtn" href="#" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-6 group">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Back to Practice
+    </a>
+
+    <!-- Header -->
+    <div class="ai-gradient rounded-3xl p-8 text-white mb-8 relative overflow-hidden">
+      <div class="relative z-10 flex items-center gap-5">
+        <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-black mb-1">AI Practice Mode</h1>
+          <p id="courseNameHeader" class="text-blue-200 text-sm font-medium">Loading course...</p>
+        </div>
+      </div>
+      <svg class="absolute -right-10 -bottom-10 w-48 h-48 text-white/5" fill="currentColor" viewBox="0 0 24 24"><path d="M13,3C9.23,3,6.19,5.95,6,9.66C4.27,10.12,3,11.66,3,13.5c0,2,1.5,3.5,3.5,3.5h0.1c0.55,2.83,3.04,5,6.04,5c2.4,0,4.52-1.39,5.5-3.41c0.16,0.01,0.33,0.02,0.5,0.02c2.4,0,4.4-1.61,4.92-3.8c1.32-0.5,2.22-1.78,2.22-3.2c0-1.88-1.48-3.41-3.34-3.49C21.49,5.32,17.74,3,13,3z"/></svg>
+    </div>
+
+    <!-- Setup Panel -->
+    <div id="setupPanel" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-8">
+      <h2 class="text-xl font-black text-gray-900 mb-6">Configure Your AI Session</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Question Type -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">Question Type</label>
+          <div class="flex gap-3">
+            <button onclick="setType('both')" id="typeBoth"
+              class="flex-1 py-3 px-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-bold text-sm transition-all">
+              Both
+            </button>
+            <button onclick="setType('mcq')" id="typeMCQ"
+              class="flex-1 py-3 px-4 rounded-2xl border-2 border-gray-100 text-gray-500 font-bold text-sm transition-all hover:border-gray-200">
+              MCQ Only
+            </button>
+            <button onclick="setType('long')" id="typeLong"
+              class="flex-1 py-3 px-4 rounded-2xl border-2 border-gray-100 text-gray-500 font-bold text-sm transition-all hover:border-gray-200">
+              Long Only
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Count -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">Number of Questions: <span id="countDisplay" class="text-blue-600">5</span></label>
+          <input type="range" id="questionCount" min="3" max="20" value="5"
+            oninput="document.getElementById('countDisplay').textContent = this.value"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>3</span><span>20</span>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="generateQuestions()"
+        class="w-full ai-gradient text-white font-black py-4 rounded-2xl text-lg transition-all hover:opacity-90 hover:scale-[1.01] active:scale-95 shadow-lg shadow-blue-200 flex items-center justify-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Generate AI Questions
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingPanel" class="hidden bg-white rounded-3xl p-12 border border-gray-100 shadow-sm mb-8 text-center">
+      <div class="relative w-20 h-20 mx-auto mb-6">
+        <div class="pulse-ring absolute inset-0 rounded-full bg-blue-100"></div>
+        <div class="relative w-20 h-20 ai-gradient rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-xl font-black text-gray-900 mb-2">Generating Questions...</h3>
+      <p class="text-gray-400 font-medium" id="loadingMsg">AI is analyzing your course material</p>
+    </div>
+
+    <!-- Quiz Panel -->
+    <div id="quizPanel" class="hidden">
+      <!-- Progress -->
+      <div class="bg-white rounded-2xl px-6 py-4 border border-gray-100 shadow-sm mb-4 flex items-center justify-between">
+        <span id="qCounter" class="text-sm font-bold text-gray-500">Question 1 of 5</span>
+        <span id="qScore" class="text-sm font-bold text-gray-500">Score: 0/0</span>
+      </div>
+      <div class="w-full bg-gray-100 h-1.5 rounded-full mb-6 overflow-hidden">
+        <div id="qProgressBar" class="ai-gradient h-full transition-all duration-500" style="width:20%"></div>
+      </div>
+
+      <!-- Question Card -->
+      <div id="questionCard" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-4 slide-up">
+        <div id="qTypeBadge" class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4"></div>
+        <h2 id="qText" class="text-xl font-bold text-gray-900 mb-6"></h2>
+        <div id="optionsContainer" class="space-y-3 mb-6"></div>
+        <div id="longAnswerContainer" class="hidden mb-6">
+          <textarea id="longAnswer" rows="4" placeholder="Type your answer here..."
+            class="w-full px-4 py-3 border-2 border-gray-100 rounded-2xl focus:border-blue-400 outline-none text-sm font-medium resize-none transition-all"></textarea>
+        </div>
+        <div id="feedbackBox" class="hidden p-4 rounded-2xl border mb-6 flex items-start gap-3"></div>
+        <button id="actionBtn" disabled onclick="handleAction()"
+          class="w-full ai-gradient disabled:opacity-40 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-black transition-all">
+          Submit Answer
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div id="resultsPanel" class="hidden bg-white rounded-3xl p-10 border border-gray-100 shadow-sm text-center slide-up">
+      <div class="w-20 h-20 ai-gradient rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <h1 class="text-3xl font-black text-gray-900 mb-2">Session Complete!</h1>
+      <p id="resultText" class="text-gray-400 font-medium mb-8"></p>
+      <div class="w-full bg-gray-100 h-3 rounded-full mb-2 overflow-hidden">
+        <div id="resultBar" class="ai-gradient h-full transition-all duration-1000" style="width:0%"></div>
+      </div>
+      <p id="resultPercent" class="text-sm font-black text-gray-400 uppercase tracking-widest mb-10"></p>
+      <div class="flex gap-4">
+        <button onclick="resetSession()" class="flex-1 ai-gradient text-white py-4 rounded-2xl font-black transition-all hover:opacity-90">
+          Generate New Questions
+        </button>
+        <a id="backToPractice" href="#" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 py-4 rounded-2xl font-black transition-all text-center">
+          Back to Practice
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let courseId = '';
+    let courseName = '';
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let isAnswered = false;
+    let selectedType = 'both';
+
+    // Init
+    const urlParams = new URLSearchParams(window.location.search);
+    courseId = urlParams.get('id') || '';
+    if (!courseId) window.location.href = 'courses.html';
+
+    document.getElementById('backBtn').href = `practice.html?id=${courseId}`;
+    document.getElementById('backToPractice').href = `practice.html?id=${courseId}`;
+
+    // Load course name
+    fetch(`${API_URL}/api/subjects/${courseId}`)
+      .then(r => r.json())
+      .then(c => {
+        courseName = c.description || courseId;
+        document.getElementById('courseNameHeader').textContent = courseName;
+      }).catch(() => {
+        document.getElementById('courseNameHeader').textContent = courseId;
+      });
+
+    function setType(type) {
+      selectedType = type;
+      ['both','mcq','long'].forEach(t => {
+        const btn = document.getElementById('type' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (t === type) {
+          btn.className = 'flex-1 py-3 px-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-700 font-bold text-sm transition-all';
+        } else {
+          btn.className = 'flex-1 py-3 px-4 rounded-2xl border-2 border-gray-100 text-gray-500 font-bold text-sm transition-all hover:border-gray-200';
+        }
+      });
+    }
+
+    async function generateQuestions() {
+      const count = parseInt(document.getElementById('questionCount').value);
+      
+      document.getElementById('setupPanel').classList.add('hidden');
+      document.getElementById('loadingPanel').classList.remove('hidden');
+
+      const msgs = [
+        'AI is analyzing your course material...',
+        'Generating unique questions...',
+        'Reviewing and validating answers...',
+        'Almost ready!'
+      ];
+      let msgIdx = 0;
+      const msgInterval = setInterval(() => {
+        msgIdx = (msgIdx + 1) % msgs.length;
+        document.getElementById('loadingMsg').textContent = msgs[msgIdx];
+      }, 1500);
+
+      try {
+        const response = await fetch(`${API_URL}/api/ai/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subjectId: courseId,
+            count: count,
+            type: selectedType
+          })
+        });
+
+        clearInterval(msgInterval);
+
+        if (!response.ok) throw new Error('API error');
+        const data = await response.json();
+        questions = data.questions || data;
+
+        if (!questions || questions.length === 0) throw new Error('No questions');
+
+        document.getElementById('loadingPanel').classList.add('hidden');
+        document.getElementById('quizPanel').classList.remove('hidden');
+        currentIndex = 0;
+        score = 0;
+        renderQuestion();
+
+      } catch (err) {
+        clearInterval(msgInterval);
+        console.error(err);
+        // Fallback: generate simple questions locally
+        questions = generateFallbackQuestions(count);
+        document.getElementById('loadingPanel').classList.add('hidden');
+        document.getElementById('quizPanel').classList.remove('hidden');
+        currentIndex = 0;
+        score = 0;
+        renderQuestion();
+      }
+    }
+
+    function generateFallbackQuestions(count) {
+      const mcqTemplates = [
+        { q: `What is the primary focus of ${courseName}?`, opts: ['Theoretical concepts', 'Practical applications', 'Both theory and practice', 'Neither'], ans: 'Both theory and practice' },
+        { q: `Which approach is most effective when studying ${courseId}?`, opts: ['Memorization only', 'Understanding concepts', 'Skipping examples', 'Reading once'], ans: 'Understanding concepts' },
+        { q: `How should you approach problem-solving in ${courseName}?`, opts: ['Guess randomly', 'Follow a systematic method', 'Skip difficult problems', 'Copy solutions'], ans: 'Follow a systematic method' },
+      ];
+      const longTemplates = [
+        { q: `Explain the key concepts you have learned in ${courseName} and how they apply to real-world scenarios.`, ans: `The key concepts in ${courseName} include fundamental theories and practical applications. Understanding these concepts allows students to apply them in real-world problem-solving scenarios.` },
+        { q: `Describe the main challenges in ${courseName} and how to overcome them.`, ans: `The main challenges include understanding complex theories and applying them practically. These can be overcome through consistent practice, reviewing examples, and seeking clarification on difficult topics.` },
+      ];
+      
+      const result = [];
+      for (let i = 0; i < count; i++) {
+        if (selectedType === 'mcq' || (selectedType === 'both' && i % 2 === 0)) {
+          const t = mcqTemplates[i % mcqTemplates.length];
+          result.push({ question: t.q, options: t.opts, correctAnswer: t.ans, type: 'mcq' });
+        } else {
+          const t = longTemplates[i % longTemplates.length];
+          result.push({ question: t.q, options: [], correctAnswer: t.ans, type: 'long' });
+        }
+      }
+      return result;
+    }
+
+    function renderQuestion() {
+      isAnswered = false;
+      const q = questions[currentIndex];
+      const isMCQ = q.options && q.options.length > 0;
+
+      document.getElementById('qCounter').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById('qScore').textContent = `Score: ${score}/${currentIndex}`;
+      document.getElementById('qProgressBar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+      document.getElementById('qText').textContent = q.question;
+
+      // Badge
+      const badge = document.getElementById('qTypeBadge');
+      if (isMCQ) {
+        badge.textContent = 'MCQ';
+        badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4 bg-green-100 text-green-700';
+      } else {
+        badge.textContent = 'Long Answer';
+        badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4 bg-purple-100 text-purple-700';
+      }
+
+      document.getElementById('feedbackBox').classList.add('hidden');
+      const actionBtn = document.getElementById('actionBtn');
+      actionBtn.textContent = 'Submit Answer';
+      actionBtn.disabled = true;
+      actionBtn.onclick = handleAction;
+
+      if (isMCQ) {
+        document.getElementById('optionsContainer').classList.remove('hidden');
+        document.getElementById('longAnswerContainer').classList.add('hidden');
+        const container = document.getElementById('optionsContainer');
+        container.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn w-full p-4 text-left border-2 border-gray-100 rounded-2xl font-medium text-gray-700 hover:border-blue-200 transition-all';
+          btn.textContent = opt;
+          btn.onclick = () => {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            btn.dataset.idx = idx;
+            actionBtn.disabled = false;
+            actionBtn.dataset.selected = idx;
+          };
+          container.appendChild(btn);
+        });
+      } else {
+        document.getElementById('optionsContainer').classList.add('hidden');
+        document.getElementById('longAnswerContainer').classList.remove('hidden');
+        const ta = document.getElementById('longAnswer');
+        ta.value = '';
+        ta.oninput = () => { actionBtn.disabled = ta.value.trim().length < 5; };
+      }
+    }
+
+    function handleAction() {
+      if (isAnswered) {
+        // Next question
+        currentIndex++;
+        if (currentIndex >= questions.length) {
+          showResults();
+        } else {
+          document.getElementById('questionCard').classList.remove('slide-up');
+          void document.getElementById('questionCard').offsetWidth;
+          document.getElementById('questionCard').classList.add('slide-up');
+          renderQuestion();
+        }
+        return;
+      }
+
+      isAnswered = true;
+      const q = questions[currentIndex];
+      const isMCQ = q.options && q.options.length > 0;
+      const feedback = document.getElementById('feedbackBox');
+      const actionBtn = document.getElementById('actionBtn');
+
+      if (isMCQ) {
+        const selected = document.querySelector('.option-btn.selected');
+        const isCorrect = selected && selected.textContent.trim() === q.correctAnswer;
+        if (isCorrect) score++;
+
+        document.querySelectorAll('.option-btn').forEach(btn => {
+          if (btn.textContent.trim() === q.correctAnswer) btn.classList.add('correct');
+          else if (btn.classList.contains('selected')) btn.classList.add('incorrect');
+          btn.classList.remove('selected');
+        });
+
+        feedback.classList.remove('hidden');
+        if (isCorrect) {
+          feedback.className = 'p-4 rounded-2xl border border-green-200 bg-green-50 mb-6 flex items-start gap-3';
+          feedback.innerHTML = `<span class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">✓</span><p class="text-sm font-bold text-green-700">Correct! Well done!</p>`;
+        } else {
+          feedback.className = 'p-4 rounded-2xl border border-red-200 bg-red-50 mb-6 flex items-start gap-3';
+          feedback.innerHTML = `<span class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">✕</span><p class="text-sm font-bold text-red-700">Incorrect. Correct answer: <span class="font-black">${q.correctAnswer}</span></p>`;
+        }
+      } else {
+        // Long answer — show model answer
+        score++;
+        feedback.classList.remove('hidden');
+        feedback.className = 'p-4 rounded-2xl border border-blue-200 bg-blue-50 mb-6 flex items-start gap-3';
+        feedback.innerHTML = `
+          <span class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">★</span>
+          <div>
+            <p class="text-sm font-black text-blue-800 mb-1">Model Answer:</p>
+            <p class="text-sm text-blue-700 leading-relaxed">${q.correctAnswer}</p>
+          </div>`;
+        document.getElementById('longAnswer').disabled = true;
+      }
+
+      document.getElementById('qScore').textContent = `Score: ${score}/${currentIndex + 1}`;
+      actionBtn.textContent = currentIndex < questions.length - 1 ? 'Next Question →' : 'View Results';
+      actionBtn.disabled = false;
+    }
+
+    function showResults() {
+      document.getElementById('quizPanel').classList.add('hidden');
+      document.getElementById('resultsPanel').classList.remove('hidden');
+      const percent = Math.round((score / questions.length) * 100);
+      document.getElementById('resultText').textContent = `You scored ${score} out of ${questions.length} questions`;
+      document.getElementById('resultPercent').textContent = `${percent}% Correct`;
+      setTimeout(() => {
+        document.getElementById('resultBar').style.width = `${percent}%`;
+      }, 100);
+    }
+
+    function resetSession() {
+      questions = [];
+      currentIndex = 0;
+      score = 0;
+      isAnswered = false;
+      document.getElementById('resultsPanel').classList.add('hidden');
+      document.getElementById('quizPanel').classList.add('hidden');
+      document.getElementById('setupPanel').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>
