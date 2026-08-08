@@ -402,46 +402,5 @@ Potential improvements include:
 
 ---
 
-## 🌐 Demo
-
-| Service        | Link                                           |
-| -------------- | ---------------------------------------------- |
-| 🌐 Frontend    | https://aou11.onrender.com                     |
-| ⚙️ Backend API | https://studyplaform.onrender.com/api/subjects |
-| 💻 Repository  | https://github.com/srcode11/srcode11           |
-
-> Some services may require the backend and database environment to be available for full functionality.
-
----
-
-## 👩‍💻 Team
-
-| Role               | Contributor               |
-| ------------------ | ------------------------- |
-| Backend Developer  | [Your Name]               |
-| Frontend Developer | [Frontend Developer Name] |
-| AI Developer       | [AI Developer Name]       |
-
----
-
-## 📄 License
-
-This project was developed for educational purposes as a graduation project.
-
-**All rights reserved.**
-
----
-
-## 📬 Contact
-
-For inquiries or additional information:
-
-**Email:** [[your-email@example.com](mailto:your-email@example.com)]
-
----
-
-<p align="center">
-  © 2026 AOU Study Tracker Team
-  <br>
-  Built with ❤️ for better university learning.
+sity learning.
 </p>
